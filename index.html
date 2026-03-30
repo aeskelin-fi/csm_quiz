@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSM Practice Test</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #f8f7f4; color: #1a1a1a; min-height: 100vh; }
+
+  .header { background: #1b3a6b; color: white; padding: 2rem; text-align: center; }
+  .header h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.4rem; }
+  .header p { font-size: 0.9rem; opacity: 0.8; }
+
+  .progress-bar-wrap { background: #e5e0d8; height: 6px; }
+  .progress-bar { background: #e8772e; height: 6px; transition: width 0.4s ease; }
+
+  .meta { display: flex; justify-content: space-between; padding: 0.75rem 2rem; font-size: 0.85rem; color: #555; border-bottom: 1px solid #ddd; background: white; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 2rem 1rem; }
+
+  .question-card { background: white; border-radius: 12px; border: 1px solid #e0dbd0; padding: 2rem; margin-bottom: 1.5rem; }
+  .question-num { font-size: 0.78rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
+  .question-text { font-size: 1.05rem; line-height: 1.6; margin-bottom: 1.5rem; }
+  .lo-tag { display: inline-block; font-size: 0.72rem; background: #eef2fa; color: #3a5da0; border-radius: 4px; padding: 2px 8px; margin-bottom: 0.75rem; }
+
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option { display: flex; align-items: flex-start; gap: 12px; padding: 0.85rem 1rem; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+  .option:hover { background: #f5f3ee; border-color: #bbb; }
+  .option.selected { border-color: #1b3a6b; background: #eef2fa; }
+  .option.correct { border-color: #2a7c4f; background: #eaf5ee; }
+  .option.wrong { border-color: #b03030; background: #fdf0f0; }
+  .option.reveal-correct { border-color: #2a7c4f; background: #eaf5ee; }
+
+  .option-letter { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #ccc; font-size: 0.8rem; font-weight: 600; flex-shrink: 0; color: #555; }
+  .option.selected .option-letter { border-color: #1b3a6b; color: #1b3a6b; background: #d6e0f5; }
+  .option.correct .option-letter { border-color: #2a7c4f; color: #2a7c4f; background: #c3ead3; }
+  .option.wrong .option-letter { border-color: #b03030; color: #b03030; background: #f5c6c6; }
+  .option.reveal-correct .option-letter { border-color: #2a7c4f; color: #2a7c4f; background: #c3ead3; }
+
+  .option-text { font-size: 0.95rem; line-height: 1.5; padding-top: 2px; }
+
+  .feedback { margin-top: 1rem; padding: 0.85rem 1rem; border-radius: 8px; font-size: 0.9rem; line-height: 1.5; display: none; }
+  .feedback.correct-fb { background: #eaf5ee; color: #1d5c38; border: 1px solid #a3d4b5; }
+  .feedback.wrong-fb { background: #fdf0f0; color: #7a1f1f; border: 1px solid #e8b4b4; }
+
+  .btn-check { margin-top: 1.25rem; background: #1b3a6b; color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-size: 0.95rem; cursor: pointer; font-weight: 500; }
+  .btn-check:hover { background: #15306a; }
+  .btn-check:disabled { background: #aaa; cursor: default; }
+
+  .nav-buttons { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; }
+  .btn-nav { background: white; color: #1b3a6b; border: 1px solid #1b3a6b; padding: 0.65rem 1.4rem; border-radius: 8px; font-size: 0.9rem; cursor: pointer; font-weight: 500; }
+  .btn-nav:hover { background: #f0f4fb; }
+  .btn-nav.primary { background: #1b3a6b; color: white; }
+  .btn-nav.primary:hover { background: #15306a; }
+
+  .results-card { background: white; border-radius: 12px; border: 1px solid #e0dbd0; padding: 2.5rem; text-align: center; }
+  .results-score { font-size: 3.5rem; font-weight: 700; color: #1b3a6b; }
+  .results-label { font-size: 1rem; color: #666; margin-bottom: 1.5rem; }
+  .results-verdict { font-size: 1.1rem; font-weight: 500; padding: 0.75rem 1.5rem; border-radius: 8px; display: inline-block; margin-bottom: 1.5rem; }
+  .verdict-pass { background: #eaf5ee; color: #1d5c38; }
+  .verdict-fail { background: #fdf0f0; color: #7a1f1f; }
+  .results-breakdown { margin-top: 1.5rem; }
+  .breakdown-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-top: 1px solid #eee; font-size: 0.9rem; }
+  .btn-restart { background: #1b3a6b; color: white; border: none; padding: 0.75rem 2rem; border-radius: 8px; font-size: 1rem; cursor: pointer; margin-top: 1.5rem; }
+  .btn-restart:hover { background: #15306a; }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Certified ScrumMaster (CSM) — Practice Test</h1>
+  <p>20 questions · Based on Scrum Guide 2020 &amp; Scrum Alliance Learning Objectives</p>
+</div>
+<div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+<div class="meta">
+  <span id="metaQ">Question 1 of 20</span>
+  <span id="metaScore">Score: 0 / 0</span>
+</div>
+
+<div class="container" id="quizContainer"></div>
+<div class="container hidden" id="resultsContainer"></div>
+
+<script>
+const questions = [
+  {
+    lo: "SF 1.1 — Scrum definition",
+    text: "Which of the following best describes Scrum?",
+    options: [
+      "A prescriptive methodology that defines exactly how software must be built.",
+      "A lightweight framework that helps people, teams, and organizations generate value through adaptive solutions for complex problems.",
+      "A project management tool for tracking tasks and timelines in predictable environments.",
+      "A set of engineering practices designed to improve code quality."
+    ],
+    correct: 1,
+    feedback: "The Scrum Guide defines Scrum as 'a lightweight framework that helps people, teams and organizations generate value through adaptive solutions for complex problems.' Scrum is explicitly not a prescriptive methodology — it is purposefully incomplete and context-dependent."
+  },
+  {
+    lo: "SF 1.2 — Scrum values",
+    text: "Which of the following is NOT one of the five Scrum values?",
+    options: [
+      "Commitment",
+      "Transparency",
+      "Courage",
+      "Openness"
+    ],
+    correct: 1,
+    feedback: "Transparency is one of the three empirical pillars of Scrum, not one of the five Scrum values. The five Scrum values are: Commitment, Focus, Openness, Respect, and Courage."
+  },
+  {
+    lo: "SF 1.4 — Empirical pillars",
+    text: "Scrum is founded on empiricism. Which three pillars uphold empirical process control?",
+    options: [
+      "Planning, Execution, and Review",
+      "Transparency, Inspection, and Adaptation",
+      "Commitment, Focus, and Courage",
+      "Visibility, Measurement, and Control"
+    ],
+    correct: 1,
+    feedback: "The three empirical Scrum pillars are Transparency, Inspection, and Adaptation. These pillars work together: transparency enables inspection, and inspection without adaptation is considered pointless."
+  },
+  {
+    lo: "SF 1.5 — Iterative and incremental approach",
+    text: "A Scrum Team has been asked to justify using an iterative and incremental approach. Which of the following is a valid benefit they could cite?",
+    options: [
+      "It eliminates all risk because the plan is fixed at the start.",
+      "It ensures the product is fully specified before any work begins.",
+      "It allows the team to optimize predictability and control risk by incorporating regular feedback loops.",
+      "It removes the need for stakeholder collaboration once the Sprint starts."
+    ],
+    correct: 2,
+    feedback: "Scrum's iterative, incremental approach optimizes predictability and controls risk. Each Sprint creates a feedback loop that allows the team and stakeholders to inspect and adapt — something a fixed, linear plan cannot provide."
+  },
+  {
+    lo: "SF 3.2 — Sprint duration",
+    text: "What is the maximum length of a Sprint?",
+    options: [
+      "Two weeks",
+      "Three weeks",
+      "One month",
+      "Six weeks"
+    ],
+    correct: 2,
+    feedback: "According to the Scrum Guide, Sprints are fixed-length events of one month or less. When a Sprint's horizon is too long, the Sprint Goal may become invalid, complexity may rise, and risk may increase."
+  },
+  {
+    lo: "SF 3.4 — Sprint Planning timebox",
+    text: "What is the maximum timebox for Sprint Planning when running a one-month Sprint?",
+    options: [
+      "Two hours",
+      "Four hours",
+      "Eight hours",
+      "Twelve hours"
+    ],
+    correct: 2,
+    feedback: "Sprint Planning is timeboxed to a maximum of eight hours for a one-month Sprint. For shorter Sprints, the event is usually proportionally shorter."
+  },
+  {
+    lo: "SF 3.4 — Daily Scrum",
+    text: "A developer argues that the Daily Scrum is just a status meeting for the Scrum Master to track progress. How would you respond?",
+    options: [
+      "They are correct — the Scrum Master should use it to update the project tracker.",
+      "The Daily Scrum is a 15-minute event for the Developers to inspect progress toward the Sprint Goal and adapt their plan. It belongs to the Developers, not the Scrum Master.",
+      "The Daily Scrum should last as long as needed to cover all team updates.",
+      "The Daily Scrum is optional if the team communicates well through other channels."
+    ],
+    correct: 1,
+    feedback: "The Daily Scrum is a 15-minute event for the Developers — its purpose is to inspect progress toward the Sprint Goal and adapt the Sprint Backlog. It is not a status meeting for the Scrum Master, and it has a strict 15-minute timebox."
+  },
+  {
+    lo: "SF 3.4 — Sprint Review",
+    text: "What is the primary purpose of the Sprint Review?",
+    options: [
+      "To formally approve the Increment before it can be released to users.",
+      "To inspect the outcome of the Sprint and determine future adaptations, with the Scrum Team and stakeholders collaborating on what to do next.",
+      "To evaluate team members' individual performance during the Sprint.",
+      "To present completed work to management for sign-off."
+    ],
+    correct: 1,
+    feedback: "The Sprint Review is a working session to inspect the Sprint's outcome and determine future adaptations. The Scrum Guide is explicit that 'the Sprint Review should never be considered a gate to releasing value.' It is collaborative, not a formal approval ceremony."
+  },
+  {
+    lo: "CSM 1.11 — Sprint Retrospective effects",
+    text: "A Scrum Team consistently skips the Sprint Retrospective to have more time for development. Which of the following is a likely consequence?",
+    options: [
+      "The team will deliver more value because they have extra development capacity.",
+      "The team loses a formal opportunity to identify and address process improvements, likely causing recurring issues to go unresolved.",
+      "The Sprint Review will automatically cover retrospective topics.",
+      "Skipping is acceptable as long as the team communicates informally."
+    ],
+    correct: 1,
+    feedback: "The Sprint Retrospective is the Scrum Team's formal opportunity to inspect how the last Sprint went and plan improvements. Skipping it means problems accumulate, quality practices stagnate, and the team misses its primary lever for continuous improvement. Informal chats do not replace this structured event."
+  },
+  {
+    lo: "SF 4.1 / CSM 1.15 — Definition of Done",
+    text: "Which of the following best describes an advantage of a strong Definition of Done?",
+    options: [
+      "It allows the team to release work even if some quality criteria are not yet met.",
+      "It creates a shared, transparent understanding of what 'complete' means, enabling the team to produce a potentially releasable Increment each Sprint.",
+      "It removes the need for a Sprint Review since quality is guaranteed.",
+      "It is created by the Scrum Master alone and applied to all teams in the organization."
+    ],
+    correct: 1,
+    feedback: "A strong Definition of Done creates transparency and a shared understanding of completion. It ensures the Increment is potentially releasable and builds trust with stakeholders. It must be agreed upon by the Scrum Team (or multiple teams sharing a product)."
+  },
+  {
+    lo: "SF 4.7 — Sprint Goal stability",
+    text: "During a Sprint, new information emerges that makes the original Sprint Goal appear less valuable. What should happen?",
+    options: [
+      "The Developers update the Sprint Goal to reflect the new information.",
+      "The Scrum Master cancels the Sprint immediately.",
+      "The Sprint Goal does not change — the team may negotiate scope with the Product Owner, but the Sprint Goal remains the anchor for the Sprint.",
+      "The team pauses the Sprint and waits for stakeholder guidance."
+    ],
+    correct: 2,
+    feedback: "The Sprint Goal does not change during a Sprint. If the work turns out different than expected, the Developers collaborate with the Product Owner to negotiate the scope of the Sprint Backlog — but the Sprint Goal itself provides stability and coherence throughout the Sprint. Only the Product Owner can cancel a Sprint if the Sprint Goal becomes obsolete."
+  },
+  {
+    lo: "Scrum Guide — Sprint cancellation",
+    text: "Under what circumstances can a Sprint be cancelled, and who has the authority to do so?",
+    options: [
+      "Any Scrum Team member can cancel a Sprint if the work becomes too complex.",
+      "The Scrum Master can cancel a Sprint if team velocity drops significantly.",
+      "Only the Product Owner has the authority to cancel a Sprint, and only if the Sprint Goal has become obsolete.",
+      "Stakeholders can cancel a Sprint during the Sprint Review if unsatisfied with progress."
+    ],
+    correct: 2,
+    feedback: "According to the Scrum Guide, only the Product Owner has the authority to cancel a Sprint, and this should only happen if the Sprint Goal becomes obsolete — for example, due to a major market change or company direction shift. Sprint cancellations are rare and disruptive."
+  },
+  {
+    lo: "CSM 1.5 — Product Owner as one person",
+    text: "A company proposes replacing the Product Owner role with a committee of three product managers who vote on backlog decisions. What is the problem with this approach?",
+    options: [
+      "There is no problem — a committee brings more diverse perspectives to backlog management.",
+      "The Product Owner must be a single person to ensure clear, decisive decision-making. Committees create ambiguity, slower decisions, and unclear accountability.",
+      "Committees are acceptable if they meet the Definition of Done.",
+      "The Scrum Guide recommends committees only for large products."
+    ],
+    correct: 1,
+    feedback: "The Scrum Guide is unambiguous: 'The Product Owner is one person, not a committee.' A single Product Owner ensures clear accountability and decisive prioritization. When multiple people share that authority, decisions become slow and the Scrum Team loses a clear source of direction."
+  },
+  {
+    lo: "CSM 1.6 — Product Owner and Product Backlog authority",
+    text: "A senior stakeholder directly instructs Developers to add urgent items to the Sprint Backlog without telling the Product Owner. What should happen?",
+    options: [
+      "Developers should comply since the request comes from a senior stakeholder.",
+      "The Scrum Master should add the items on behalf of the stakeholder.",
+      "Those wanting to change the Product Backlog must work through the Product Owner, who has sole authority over its content and ordering.",
+      "The items should be added and the Product Owner notified after the Sprint."
+    ],
+    correct: 2,
+    feedback: "The Product Owner has sole accountability for Product Backlog management, including ordering and content. Anyone wanting to change the backlog must convince the Product Owner. Developers and the Scrum Master should redirect the stakeholder to the Product Owner rather than bypassing this accountability."
+  },
+  {
+    lo: "CSM 2.1 / 2.3 — Facilitation and coaching",
+    text: "A Scrum Master notices the team cannot agree on how to approach a technical problem during Sprint Planning. Which response best demonstrates facilitation skills?",
+    options: [
+      "Make the decision for the team to save time.",
+      "Leave the team to resolve it alone since they are self-managing.",
+      "Use a structured technique — such as dot voting or a round-robin — to help the team surface options and reach a decision together.",
+      "Escalate the decision to the Product Owner immediately."
+    ],
+    correct: 2,
+    feedback: "Facilitation means helping a group reach decisions by themselves, not deciding for them. Techniques like dot voting, affinity mapping, or fist-of-five help surface consensus without the Scrum Master imposing a solution. This is different from coaching (building capability) or mentoring (sharing experience)."
+  },
+  {
+    lo: "CSM 2.3 — Facilitation vs teaching vs mentoring vs coaching",
+    text: "A new Scrum Team member asks: 'What is the difference between the Scrum Master coaching the team and mentoring them?' Which answer is most accurate?",
+    options: [
+      "They are the same — coaching and mentoring both mean giving people advice.",
+      "Coaching helps individuals discover their own answers through questions and reflection; mentoring shares the mentor's own experience and knowledge to guide someone.",
+      "Mentoring is for technical skills; coaching is only for soft skills.",
+      "Coaching is done in groups; mentoring is always one-on-one."
+    ],
+    correct: 1,
+    feedback: "Coaching uses questioning and reflection to help someone develop their own solutions and grow — the Scrum Master holds back answers. Mentoring involves sharing one's own experience and knowledge more directly. A Scrum Master uses both depending on the situation, alongside facilitation (guiding group processes) and teaching (direct instruction)."
+  },
+  {
+    lo: "CSM 3.2 — Technical debt",
+    text: "Why should a Scrum Master care about technical debt, even though it is primarily a development concern?",
+    options: [
+      "Technical debt is the Product Owner's responsibility, not the Scrum Master's.",
+      "Accumulated technical debt slows the team over time, reduces the quality of Increments, and can make it harder to meet the Definition of Done — directly impacting the team's effectiveness.",
+      "Technical debt only matters in software products and not in other domains.",
+      "The Scrum Master should ignore technical debt unless it causes a missed Sprint Goal."
+    ],
+    correct: 1,
+    feedback: "The Scrum Master is accountable for the Scrum Team's effectiveness. Accumulated technical debt degrades quality, slows delivery, and erodes the team's ability to produce releasable Increments. A Scrum Master should help the team recognize the impact of technical debt and support development practices that minimize it."
+  },
+  {
+    lo: "CSM 3.4 — Scrum Master serving the Product Owner",
+    text: "How can the Scrum Master best support the Product Owner?",
+    options: [
+      "By writing and prioritizing Product Backlog items on behalf of the Product Owner.",
+      "By helping the Product Owner find techniques for effective goal definition, facilitating stakeholder collaboration, and helping the Scrum Team understand the need for clear and concise backlog items.",
+      "By attending all stakeholder meetings in place of the Product Owner.",
+      "By ensuring the Product Owner attends every Daily Scrum."
+    ],
+    correct: 1,
+    feedback: "The Scrum Guide describes several ways the Scrum Master serves the Product Owner: helping with techniques for Product Goal definition and backlog management, facilitating stakeholder collaboration, and helping the team understand clear backlog items. The Scrum Master supports the PO — but does not take over their accountabilities."
+  },
+  {
+    lo: "CSM 3.5 / 3.6 — Organizational impediments",
+    text: "A Scrum Team reports that they cannot get timely decisions from a legal department, causing recurring delays. How should the Scrum Master respond?",
+    options: [
+      "Tell the team to work around the legal department and move forward without their input.",
+      "Log the impediment in the Sprint Backlog and wait for it to resolve itself.",
+      "Surface the impediment transparently, work with the team and organizational leadership to remove the structural barrier — for example, by establishing a defined response-time agreement with the legal department.",
+      "Cancel the Sprint until the legal issue is resolved."
+    ],
+    correct: 2,
+    feedback: "Removing organizational impediments is a core Scrum Master responsibility. This particular impediment is structural — it sits outside the team's control. The Scrum Master should make it visible, engage leadership, and help establish mechanisms (like SLAs with legal) that allow the team to work at a sustainable pace."
+  },
+  {
+    lo: "CSM 3.9 — No project manager in Scrum",
+    text: "A traditional organization asks why Scrum does not have a project manager role. What is the most accurate explanation?",
+    options: [
+      "Scrum replaces the project manager with the Scrum Master, who performs the same tasks.",
+      "In Scrum, the responsibilities traditionally held by a project manager are distributed: the Product Owner manages the product direction, the Developers manage how they do the work, and the Scrum Master serves the process and removes impediments.",
+      "Project managers are unnecessary because Scrum Teams always self-organize perfectly without guidance.",
+      "Scrum omits project managers only in software development contexts."
+    ],
+    correct: 1,
+    feedback: "Scrum does not have a project manager because its accountabilities are distributed across the three roles: the Product Owner owns the 'what and why' (product value), the Developers own the 'how' (execution), and the Scrum Master serves the team and the process. This distribution promotes self-management, which is incompatible with a traditional command-and-control project manager role."
+  }
+];
+
+let current = 0;
+let answered = [];
+let score = 0;
+
+function init() {
+  answered = new Array(questions.length).fill(null);
+  score = 0;
+  current = 0;
+  document.getElementById('resultsContainer').classList.add('hidden');
+  document.getElementById('quizContainer').classList.remove('hidden');
+  render();
+}
+
+function render() {
+  const q = questions[current];
+  const isAnswered = answered[current] !== null;
+  const letters = ['A', 'B', 'C', 'D'];
+
+  document.getElementById('progressBar').style.width = ((current + 1) / questions.length * 100) + '%';
+  document.getElementById('metaQ').textContent = 'Question ' + (current + 1) + ' of ' + questions.length;
+  const answeredCount = answered.filter(a => a !== null).length;
+  const scoreCount = answered.filter((a, i) => a === questions[i].correct).length;
+  document.getElementById('metaScore').textContent = 'Score: ' + scoreCount + ' / ' + answeredCount;
+
+  let optionsHTML = q.options.map((opt, i) => {
+    let cls = 'option';
+    if (isAnswered) {
+      if (i === q.correct) cls += ' reveal-correct';
+      if (i === answered[current] && i !== q.correct) cls += ' wrong';
+      if (i === answered[current] && i === q.correct) cls = 'option correct';
+    } else {
+      if (i === answered[current]) cls += ' selected';
+    }
+    return `<div class="${cls}" onclick="selectOption(${i})">
+      <div class="option-letter">${letters[i]}</div>
+      <div class="option-text">${opt}</div>
+    </div>`;
+  }).join('');
+
+  const feedbackCls = isAnswered ? (answered[current] === q.correct ? 'correct-fb' : 'wrong-fb') : '';
+  const feedbackIcon = answered[current] === q.correct ? '✓ Correct — ' : '✗ Incorrect — ';
+  const feedbackStyle = isAnswered ? 'display:block' : 'display:none';
+
+  document.getElementById('quizContainer').innerHTML = `
+    <div class="question-card">
+      <div class="question-num">Question ${current + 1} of ${questions.length}</div>
+      <div class="lo-tag">${q.lo}</div>
+      <div class="question-text">${q.text}</div>
+      <div class="options">${optionsHTML}</div>
+      <div class="feedback ${feedbackCls}" style="${feedbackStyle}">
+        <strong>${feedbackIcon}</strong>${q.feedback}
+      </div>
+      ${!isAnswered ? `<button class="btn-check" id="btnCheck" onclick="checkAnswer()" disabled>Check answer</button>` : ''}
+    </div>
+    <div class="nav-buttons">
+      ${current > 0 ? `<button class="btn-nav" onclick="goTo(${current - 1})">← Previous</button>` : ''}
+      ${current < questions.length - 1
+        ? `<button class="btn-nav primary" onclick="goTo(${current + 1})">${isAnswered ? 'Next →' : 'Skip →'}</button>`
+        : `<button class="btn-nav primary" onclick="showResults()">See results</button>`}
+    </div>
+  `;
+
+  if (answered[current] !== null && !isAnswered) {
+    document.getElementById('btnCheck') && (document.getElementById('btnCheck').disabled = false);
+  }
+}
+
+function selectOption(i) {
+  if (answered[current] !== null) return;
+  answered[current] = i;
+  const btn = document.getElementById('btnCheck');
+  if (btn) btn.disabled = false;
+
+  const opts = document.querySelectorAll('.option');
+  opts.forEach((el, idx) => {
+    el.classList.remove('selected');
+    if (idx === i) el.classList.add('selected');
+  });
+  if (btn) btn.disabled = false;
+}
+
+function checkAnswer() {
+  if (answered[current] === null) return;
+  render();
+}
+
+function goTo(n) {
+  current = n;
+  render();
+}
+
+function showResults() {
+  const total = questions.length;
+  const correct = answered.filter((a, i) => a === questions[i].correct).length;
+  const unanswered = answered.filter(a => a === null).length;
+  const pct = Math.round(correct / total * 100);
+  const pass = pct >= 70;
+
+  const cats = [
+    { label: 'Scrum Theory & Definition', indices: [0, 1, 2, 3] },
+    { label: 'Scrum Events', indices: [4, 5, 6, 7, 8] },
+    { label: 'Artifacts & Commitments', indices: [9, 10, 11] },
+    { label: 'Scrum Roles & Accountabilities', indices: [12, 13] },
+    { label: 'Scrum Master Competencies', indices: [14, 15, 16, 17, 18, 19] }
+  ];
+
+  let breakdownHTML = cats.map(cat => {
+    const catCorrect = cat.indices.filter(i => answered[i] === questions[i].correct).length;
+    return `<div class="breakdown-row"><span>${cat.label}</span><span>${catCorrect} / ${cat.indices.length}</span></div>`;
+  }).join('');
+
+  document.getElementById('quizContainer').classList.add('hidden');
+  const rc = document.getElementById('resultsContainer');
+  rc.classList.remove('hidden');
+  rc.innerHTML = `
+    <div class="results-card">
+      <div class="results-score">${pct}%</div>
+      <div class="results-label">${correct} correct out of ${total} questions${unanswered > 0 ? ' (' + unanswered + ' unanswered)' : ''}</div>
+      <div class="results-verdict ${pass ? 'verdict-pass' : 'verdict-fail'}">
+        ${pass ? '✓ Passing score — well done!' : '✗ Below 70% — review and try again'}
+      </div>
+      <p style="font-size:0.9rem; color:#666; margin-bottom:1rem;">The actual CSM online test requires 74% to pass (37/50). Aim for 85%+ to feel confident.</p>
+      <div class="results-breakdown">
+        <div style="font-size:0.85rem; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.05em; padding-bottom:0.5rem;">Performance by category</div>
+        ${breakdownHTML}
+      </div>
+      <button class="btn-restart" onclick="init()">Retake test</button>
+    </div>
+  `;
+}
+
+init();
+</script>
+</body>
+</html>
